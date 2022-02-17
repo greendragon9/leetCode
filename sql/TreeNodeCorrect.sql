@@ -1,0 +1,21 @@
+-- https://leetcode.com/problems/tree-node/
+
+
+SELECT DISTINCT * FROM
+(
+WITH TEMP AS (
+SELECT A.id A_ID, A.p_id A_PID, B.id B_ID, B.p_id B_PID
+FROM Tree A 
+LEFT JOIN Tree B
+ON A.id = B.p_id
+ORDER BY A.id)
+
+SELECT C.id AS id, CASE
+WHEN TEMP.A_PID IS NULL THEN 'Root'
+WHEN TEMP.A_PID IS NOT NULL AND TEMP.B_ID IS NOT NULL THEN 'Inner'
+WHEN TEMP.A_PID IS NOT NULL AND TEMP.B_ID IS NULL THEN 'Leaf'
+END AS type
+FROM Tree C RIGHT JOIN TEMP 
+ON C.id = TEMP.A_ID
+)
+ORDER BY id 
