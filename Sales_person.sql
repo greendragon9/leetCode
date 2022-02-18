@@ -1,0 +1,53 @@
+
+/*
+607. Sales Person
+https://leetcode.com/problems/sales-person/
+
+
+CREATE TABLE SALESPERSON (
+sales_id number(2),
+name varchar2(20),
+salary number(6),
+commission_rate number(2),
+hire_date date
+)
+INSERT INTO SALESPERSON VALUES (2, 'John', 100000, 6, to_DATE('4/1/2006','mm/dd/yyyy'));
+INSERT INTO SALESPERSON VALUES (2, 'Amy', 12000, 5, to_DATE('5/1/2010','mm/dd/yyyy'));
+INSERT INTO SALESPERSON VALUES (3, 'Mark', 65000, 12, to_DATE('12/25/2008','mm/dd/yyyy'));
+INSERT INTO SALESPERSON VALUES (4, 'Pam', 25000, 25, to_DATE('1/1/2005','mm/dd/yyyy'));
+INSERT INTO SALESPERSON VALUES (5, 'Alex', 5000, 10, to_DATE('2/3/2007','mm/dd/yyyy'));
+
+CREATE TABLE COMPANY (
+com_id number(2),
+name varchar2(20),
+city varchar2(20)
+)
+
+INSERT INTO COMPANY VALUES (1, 'RED','Boston');
+INSERT INTO COMPANY VALUES (2, 'ORANGE','New York');
+INSERT INTO COMPANY VALUES (3, 'YELLOW','Boston');
+INSERT INTO COMPANY VALUES (4, 'GREEN','Austin');
+
+
+CREATE TABLE NEW_ORDERS (
+Order_id number(2),
+order_Date date,
+com_id number(2),
+sales_id number(2),
+amount number(10)
+)
+
+INSERT INTO NEW_ORDERS VALUES (1,DATE'2014-01-01',3,4,10000);
+INSERT INTO NEW_ORDERS VALUES (2,DATE'2014-01-02',4,5,5000);
+INSERT INTO NEW_ORDERS VALUES (3,DATE'2014-01-03',1,1,50000);
+INSERT INTO NEW_ORDERS VALUES (4,DATE'2014-01-04',1,4,25000);
+*/
+
+SELECT NAME 
+FROM SALESPERSON 
+WHERE SALES_ID NOT IN 
+(SELECT DISTINCT SALES_ID FROM NEW_ORDERS 
+WHERE COM_ID = (SELECT COM_ID FROM COMPANY WHERE NAME='RED')
+)
+
+
