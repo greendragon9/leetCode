@@ -1,0 +1,80 @@
+/*
+
+579. Find Cumulative Salary of an Employee
+
+https://leetcode.com/problems/find-cumulative-salary-of-an-employee/
+
+KEY TAKEAWAY:
+1. USE JOINS IN CASE OF J
+
+CREATE TABLE Employee (
+id number(20),
+month number(20),
+salary number(20)
+);
+
+
+INSERT INTO EMPLOYEE VALUES (1,1,20);
+INSERT INTO EMPLOYEE VALUES (2,1,20);
+INSERT INTO EMPLOYEE VALUES (1,2,30);
+INSERT INTO EMPLOYEE VALUES (2,2,30);
+INSERT INTO EMPLOYEE VALUES (3,2,40);
+INSERT INTO EMPLOYEE VALUES (1,3,40);
+INSERT INTO EMPLOYEE VALUES (3,3,60);
+INSERT INTO EMPLOYEE VALUES (1,4,60);
+INSERT INTO EMPLOYEE VALUES (3,4,70);
+INSERT INTO EMPLOYEE VALUES (1,7,90);
+INSERT INTO EMPLOYEE VALUES (1,8,90);
+
+*/
+WITH TEMP AS
+(
+SELECT EMP.*, SUM(salary) over (partition by id order by month desc) as cumm_sal
+from EMPLOYEE EMP
+)
+,
+
+t2 as (
+SELECT ID, MAX(MONTH) AS MONTH 
+FROM TEMP
+GROUP BY ID
+)
+
+select * from temp where temp.month || temp.id not in (select month||id from t2)
+----
+
+select id, month, salary ,
+sum(salary) over (partition by id order by month rows between 2 preceding and 0 following) as CSalary, 
+rank() over (partition by id order by month desc) as rank 
+from Employee
+-----
+
+SELECT A.ID as id ,A.MONTH as month, 
+coalesce(A.SALARY,0)+coalesce(B.SALARY,0)+coalesce(C.SALARY,0) AS Salary
+FROM EMPLOYEE A 
+LEFT JOIN EMPLOYEE B 
+ON A.ID  = B.ID
+AND A.MONTH = B.MONTH+1
+left JOIN EMPLOYEE C
+ON B.ID = C.ID
+AND B.MONTH = C.MONTH+1
+WHERE (A.ID,A.MONTH) NOT IN (
+SELECT ID, MAX(MONTH) FROM EMPLOYEE
+GROUP BY ID)
+ORDER BY ID, MONTH DESC
+
+----
+/* SUBMITTED ANSWER */
+SELECT ID, MONTH, CUMM_SAL AS SALARY FROM
+(SELECT A.ID, A.MONTH, A.SALARY, B.SALARY, C.SALARY,
+(A.SALARY+NVL(B.SALARY,0)+NVL(C.SALARY,0)) AS CUMM_SAL
+--(A.SALARY+NVL(B.SALARY,0)) AS CUMM_SAL
+FROM EMPLOYEE A
+LEFT JOIN EMPLOYEE B
+ON A.ID = B.ID AND A.MONTH-1 = B.MONTH
+LEFT JOIN EMPLOYEE C
+ON B.ID = C.ID AND B.MONTH-1 = C.MONTH
+--ORDER BY A.ID, A.MONTH DESC
+)TEMP
+WHERE (TEMP.ID, TEMP.MONTH) NOT IN (SELECT ID, MAX(MONTH) FROM EMPLOYEE GROUP BY ID)
+ORDER BY TEMP.ID, TEMP.MONTH DESC
